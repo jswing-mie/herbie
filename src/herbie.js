@@ -26,6 +26,7 @@ function setHerbieObj() {
 	h.hide = h.parent.find('#herbie_hide');
 	h.parse = h.parent.find('#herbie_parse');
 	h.command = h.parent.find('#herbie_command');
+	h.window = $(window);
 }
 
 function FindDesc(desc) {
@@ -86,7 +87,7 @@ function FindDesc(desc) {
 	return [];
 }
 
-// This function takes a human readable potientially multi-lined script and turns it into a structured array.
+// This function takes a human readable potentially multi-lined script and turns it into a structured array.
 function ParseScript(script) {
 	if (!script) {
 		return [];
@@ -383,8 +384,8 @@ window.Herbie.BuildUI = function(path, script, callback) {
 		// window moving
 		h.buttons.on('mousedown', function(e) {
 			if (e.button === 0  && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
-				var maxX = $(window).width() - parseInt(h.parent.css('width')),
-					maxY = $(window).height() - parseInt(h.parent.css('height')),
+				var maxX = rangeLimit(h.window.width() - parseInt(h.parent.css('width')), 0),
+					maxY = rangeLimit(h.window.height() - parseInt(h.parent.css('height')), 0),
 					offset = h.parent.offset(),
 					xStart = e.pageX - offset.left,
 					yStart = e.pageY - offset.top,
