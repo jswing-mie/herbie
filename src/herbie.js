@@ -354,6 +354,32 @@ window.Herbie.Stop = function() {
 	h.parent.hide();
 };
 
+function windowResize(e) {
+	var pos = h.parent.offset(),
+		ww = h.window.width(),
+		wh = h.window.height(),
+		pw = parseInt(h.parent.css('width')),
+		ph = parseInt(h.parent.css('height'));
+
+	if (pos.left <= 0) {
+		h.parent.css('left', 0);
+	} else if (pos.left + pw > ww) {
+		h.parent.css('left', ww - pw);
+	}
+
+	if (pos.top <= 0) {
+		h.parent.css('top', 0);
+	} else if (pos.top + ph > wh) {
+		h.parent.css('top', wh - ph);
+	}
+
+	// there seems to be a delay between the window resizing and the popup getting repositioned
+	// calling the function again fixes this (when necessary)
+	if (h.parent.offset().top < 0) {
+		windowResize(e);
+	}
+}
+
 window.Herbie.BuildUI = function(path, script, callback) {
 	if (callback) {
 		loaderCallback = callback;
@@ -475,6 +501,8 @@ window.Herbie.BuildUI = function(path, script, callback) {
 				h.parent.removeClass('show_inspect').addClass(current);
 			});
 		});
+
+		h.window.resize(windowResize);
 
 		if (loaderCallback) {
 			loaderCallback( { event: 'UIdone'} );
