@@ -407,6 +407,7 @@ window.Herbie.BuildUI = function(path, script, callback) {
 		$(this).contents().unwrap();
 		setHerbieObj();
 		$('#herbie_logo').attr('src',path+'../logos/herbie128.png');
+		$('#herbie_text').attr('src',path+'../logos/herbie_text.png');
 		$('#herbie_fa').attr('href', path+'../dist/fa/css/font-awesome.min.css');
 		if (script) {
 			h.script.text(script);

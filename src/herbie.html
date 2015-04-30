@@ -27,7 +27,6 @@ gray dark: #6d6d6d
   border: 1px solid #7f7f7f;
   border-radius: 6px;
   box-shadow: 0 4px 12px 0px rgba(0,0,0,0.5);
-  box-sizing: border-box;
   font-family: Arial, sans-serif;
   font-size: 14px;
   max-width: 100%;
@@ -42,6 +41,13 @@ gray dark: #6d6d6d
   width: 500px;
   z-index: 2147483647;
 }
+#herbie_div,
+#herbie_div * {
+  box-sizing: border-box;
+}
+#herbie_div ::-webkit-input-placeholder {
+  color: darkgrey;
+}
 
 #herbie_div #herbie_bar,
 #herbie_div #herbie_script_wrap,
@@ -53,7 +59,6 @@ gray dark: #6d6d6d
 #herbie_div textarea,
 #herbie_div input,
 #herbie_div button {
-  box-sizing: border-box;
   margin: 0;
 }
 #herbie_div textarea,
@@ -175,7 +180,7 @@ gray dark: #6d6d6d
 }
 #herbie_div #herbie_text {
   float: left;
-  height: 16px;
+  height: 32px;
   padding: 8px 2em 8px 0;
 }
 #herbie_div #herbie_script_wrap label {
