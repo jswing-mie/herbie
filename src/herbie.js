@@ -413,10 +413,8 @@ window.Herbie.BuildUI = function(path, script, callback) {
 			var maxX, maxY, offset, xStart, yStart;
 
 			function htmlmousemove(e) {
-				h.parent.offset({
-					left: rangeLimit(e.pageX - xStart, 0, maxX),
-					top: rangeLimit(e.pageY - yStart, 0, maxY)
-				});
+				h.parent[0].style.left = rangeLimit(e.pageX - xStart, 0, maxX) + 'px';
+				h.parent[0].style.top = rangeLimit(e.pageY - yStart, 0, maxY) + 'px';
 			}
 
 			function htmlmouseup(e) {
