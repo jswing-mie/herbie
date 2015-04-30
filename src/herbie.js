@@ -27,6 +27,7 @@ function setHerbieObj() {
 	h.parse = h.parent.find('#herbie_parse');
 	h.command = h.parent.find('#herbie_command');
 	h.window = $(window);
+	h.html = $('html');
 }
 
 function FindDesc(desc) {
@@ -409,28 +410,33 @@ window.Herbie.BuildUI = function(path, script, callback) {
 
 		// window moving
 		h.buttons.on('mousedown', function(e) {
+			var maxX, maxY, offset, xStart, yStart;
+
+			function htmlmousemove(e) {
+				h.parent.css('right', 'auto').offset({
+					left: rangeLimit(e.pageX - xStart, 0, maxX),
+					top: rangeLimit(e.pageY - yStart, 0, maxY)
+				});
+			}
+
+			function htmlmouseup(e) {
+				h.parent.removeClass('herbie_dragging');
+				h.html.off({
+					'mousemove': htmlmousemove,
+					'mouseup': htmlmouseup
+				});
+			}
+
+			// this only allows the primary mouse button, so I can still right click
 			if (e.button === 0  && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
-				var maxX = rangeLimit(h.window.width() - parseInt(h.parent.css('width')), 0),
-					maxY = rangeLimit(h.window.height() - parseInt(h.parent.css('height')), 0),
-					offset = h.parent.offset(),
-					xStart = e.pageX - offset.left,
-					yStart = e.pageY - offset.top,
-					htmlmousemove = function(e) {
-						h.parent.css('right', 'auto').offset({
-							left: rangeLimit(e.pageX - xStart, 0, maxX),
-							top: rangeLimit(e.pageY - yStart, 0, maxY)
-						});
-					},
-					htmlmouseup = function(e) {
-						h.parent.removeClass('herbie_dragging');
-						$(this).off({
-							'mousemove': htmlmousemove,
-							'mouseup': htmlmouseup
-						});
-					};
+				maxX = rangeLimit(h.window.width() - parseInt(h.parent.css('width')), 0);
+				maxY = rangeLimit(h.window.height() - parseInt(h.parent.css('height')), 0);
+				offset = h.parent.offset();
+				xStart = e.pageX - offset.left;
+				yStart = e.pageY - offset.top;
 
 				h.parent.addClass('herbie_dragging');
-				$('html').on({
+				h.html.on({
 					'mousemove': htmlmousemove,
 					'mouseup': htmlmouseup
 				});
