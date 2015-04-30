@@ -413,7 +413,7 @@ window.Herbie.BuildUI = function(path, script, callback) {
 			var maxX, maxY, offset, xStart, yStart;
 
 			function htmlmousemove(e) {
-				h.parent.css('right', 'auto').offset({
+				h.parent.offset({
 					left: rangeLimit(e.pageX - xStart, 0, maxX),
 					top: rangeLimit(e.pageY - yStart, 0, maxY)
 				});
@@ -509,6 +509,12 @@ window.Herbie.BuildUI = function(path, script, callback) {
 		});
 
 		h.window.resize(windowResize);
+
+		// position popup, stop using right:0
+		h.parent.css({
+			top: 2,
+			left: h.window.width() - parseInt(h.parent.css('width')) - 2
+		});
 
 		if (loaderCallback) {
 			loaderCallback( { event: 'UIdone'} );
