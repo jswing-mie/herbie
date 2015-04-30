@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /*
    This enables ECMAScript 5 strict mode.
    It eliminates poor developer practices and less efficient methods.
@@ -45,7 +45,7 @@ function FindDesc(desc) {
 			el = el.first();
 			return $('#'+el.attr('for'));  // return the element the label is for
 		}
-	} catch (ex) {}
+	} catch (ex) {/* purposely empty */}
 
 	desc = desc.slice(0,-1);  // remove the traling :
 
@@ -55,7 +55,7 @@ function FindDesc(desc) {
 			el = el.first();
 			return $('#'+el.attr('for'));  // return the element the label is for
 		}
-	} catch (ex) {}
+	} catch (ex) {/* purposely empty */}
 
 	if (hadterm) {
 		desc += ':';
@@ -66,14 +66,14 @@ function FindDesc(desc) {
 		if (el.length) {
 			return el.first();
 		}
-	} catch (ex) {}
+	} catch (ex) {/* purposely empty */}
 
 	try {
 		el = $('a').filter(':contains(' +desc+')');  // look for buttons that contain that text.
 		if (el.length) {
 			return el.first();
 		}
-	} catch (ex) {}
+	} catch (ex) {/* purposely empty */}
 
 	// as a last ditch effort see if it's a path
 	try {
@@ -137,10 +137,11 @@ function ParseScript(script) {
 							case 'on':
 							case 'in':
 							case 'into':
-								if ((cmd.code.length) && (cmd.code[ cmd.code.length - 1 ] === 'in'))
+								if ((cmd.code.length) && (cmd.code[ cmd.code.length - 1 ] === 'in')) {
 									; // do nothing
-								else
+								} else {
 									cmd.code.push('in');
+								}
 								break;
 						}
 					}
@@ -203,7 +204,9 @@ function ExecuteScript() {
 		if (!tag.length) {
 			if (cmdtree[i].timeout>0) {
 				cmdtree[i].timeout -= options.delay;
-				return setTimeout(function () { ExecuteScript(cmdtree,options,callback); }, options.delay);
+				return setTimeout(function () {
+					ExecuteScript(cmdtree,options,callback);
+				}, options.delay);
 			} else {
 				//  If we want to continue on error, we should callback(false), and then schedule the next call.
 				if (callback) {
@@ -218,9 +221,10 @@ function ExecuteScript() {
 		callback(false, options);
 	}
 
+	var seq;
 	switch (cmdtree[i].code[0]) {
 		case 'press':
-			var seq = cmdtree[i].code[1];
+			seq = cmdtree[i].code[1];
 			if (seq.charAt(0)==='"'||seq.charAt(0)==='\'') {
 				seq = seq.slice(1,-1);
 			}
@@ -236,7 +240,7 @@ function ExecuteScript() {
 				}, options.delay);
 
 		case 'type':
-			var seq = cmdtree[i].code[1];
+			seq = cmdtree[i].code[1];
 			if (seq.charAt(0)==='"'||seq.charAt(0)==='\'') {
 				seq = seq.slice(1,-1);
 			}
@@ -294,7 +298,7 @@ window.Herbie.StartScript = function(opt, progress) {
 	} else if (typeof opt === 'object') {
 		script = opt.script;
 		cmdtree = ParseScript(script);
-		options = { line: opt.line, delay: 100, cmdtree:cmdtree }
+		options = { line: opt.line, delay: 100, cmdtree:cmdtree };
 	} else {
 		script = opt;
 		cmdtree = ParseScript(script);
@@ -412,12 +416,12 @@ window.Herbie.BuildUI = function(path, script, callback) {
 		h.buttons.on('mousedown', function(e) {
 			var maxX, maxY, offset, xStart, yStart;
 
-			function htmlmousemove(e) {
-				h.parent[0].style.left = rangeLimit(e.pageX - xStart, 0, maxX) + 'px';
-				h.parent[0].style.top = rangeLimit(e.pageY - yStart, 0, maxY) + 'px';
+			function htmlmousemove(evt) {
+				h.parent[0].style.left = rangeLimit(evt.pageX - xStart, 0, maxX) + 'px';
+				h.parent[0].style.top = rangeLimit(evt.pageY - yStart, 0, maxY) + 'px';
 			}
 
-			function htmlmouseup(e) {
+			function htmlmouseup() {
 				h.parent.removeClass('herbie_dragging');
 				h.html.off({
 					'mousemove': htmlmousemove,
@@ -460,7 +464,6 @@ window.Herbie.BuildUI = function(path, script, callback) {
 		});
 
 		h.add.click(function(){
-			var cmd = $('#herbie_command');
 			var txt = h.script.val();
 
 			if (!txt.match(/\n$/)) {
