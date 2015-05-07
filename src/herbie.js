@@ -93,7 +93,7 @@ function ParseScript(script) {
 	if (!script) {
 		return [];
 	}
-	
+
 	var lines = script.split('\n');
 	var cmdtree = [];
 	var i, j;
@@ -149,9 +149,10 @@ function ParseScript(script) {
 			} else {  // this is a field value pair.  ie:  * Field: value
 				cmd.code.push('type');
 				stmt = lines[i].match(/\*[^:]+|:.+/g);
-				cmd.code.push(stmt[1].slice(1).trim());
+				// trim is not an IE friendly method, use jQuery.trim() instead
+				cmd.code.push(jQuery.trim(stmt[1].slice(1)));
 				cmd.code.push('in');
-				cmd.code.push(stmt[0].slice(1).trim());
+				cmd.code.push(jQuery.trim(stmt[0].slice(1)));
 			}
 		}
 		cmdtree.push(cmd);
@@ -283,7 +284,6 @@ function ExecuteScript() {
 }
 
 window.Herbie.StartScript = function(opt, progress) {
-
 	if (progress) {
 		loaderCallback = progress;
 	}
@@ -333,7 +333,7 @@ window.Herbie.StartScript = function(opt, progress) {
 				}
 				h.output.animate({ scrollTop: h.output[0].scrollHeight}, 10);
 			} else {
-				herbielog([done, option, comment]);
+				console.log(done, option, comment);
 			}
 			if (loaderCallback) {
 				if (done) {
@@ -418,6 +418,7 @@ window.Herbie.BuildUI = function(path, script, callback) {
 			var maxX, maxY, offset, xStart, yStart;
 
 			function htmlmousemove(evt) {
+				evt.preventDefault(); // this is IE safe because jQuery normalized it
 				h.parent[0].style.left = rangeLimit(evt.pageX - xStart, 0, maxX) + 'px';
 				h.parent[0].style.top = rangeLimit(evt.pageY - yStart, 0, maxY) + 'px';
 			}
@@ -431,7 +432,7 @@ window.Herbie.BuildUI = function(path, script, callback) {
 			}
 
 			// this only allows the primary mouse button, so I can still right click
-			if (e.button === 0  && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+			if (e.which === 1  && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
 				maxX = rangeLimit(h.window.width() - parseInt(h.parent.css('width')), 0);
 				maxY = rangeLimit(h.window.height() - parseInt(h.parent.css('height')), 0);
 				offset = h.parent.offset();
@@ -504,10 +505,15 @@ window.Herbie.BuildUI = function(path, script, callback) {
 		h.inspect.click(function(){
 			var current = h.parent[0].className;
 
-			h.parent.removeClass('show_all show_small show_hide').addClass('show_inspect');
-			document.RunInspector(h.output, function() {
-				h.parent.removeClass('show_inspect').addClass(current);
-			});
+			// old IE will run this click plus the click events attached within RunInspector all in a single click.
+			// this effectively starts and ends inspection mode in one click
+			// using setTimeout causes RunInspector to not run until after the click event has finished
+			setTimeout(function() {
+				h.parent.removeClass('show_all show_small show_hide').addClass('show_inspect');
+				document.RunInspector(h.output, function() {
+					h.parent.removeClass('show_inspect').addClass(current);
+				});
+			}, 1);
 		});
 
 		h.window.resize(windowResize);
@@ -534,10 +540,14 @@ function rangeLimit(num, min, max) {
 	}
 }
 
-function herbielog(msg) {
-	if (window.console && console.log) {
-		console.log(msg);
-	}
+})(jQuery);
+
+// fix console.log
+
+if (!console) {
+	window.console = {};
 }
 
-})(jQuery);
+if (!console.log) {
+	console.log = function() {/* do nothing */};
+}
