@@ -12,7 +12,7 @@
 		var label;
 
 		// If we have a label, our job is easy.
-		label = $("label[for='"+el.id+"']");
+		label = $('label[for="' + el.id ? el.id : '' + '"]');  // this relies on jQuery. the rest of the file appears to be straight JavaScript. why is it here?
 		if (label.length===1) {
 			return label.text();
 		}
@@ -157,15 +157,12 @@
 	 * MouseOver action for all elements on the page:
 	 */
 	function inspectorMouseOver(e) {
-		// NB: this doesn't work in IE (needs fix):
-		var element = e.target;
+		// Set last selected element so it can be 'deselected' on cancel.
+		last = e.target || e.srcElement;
 
 		// Set outline:
-		element.style.outline = '2px solid #f00';
-		if (report) report.text(  " Label: " +  getLabel(e.target) + ' / ' + cssPath(e.target));
-
-		// Set last selected element so it can be 'deselected' on cancel.
-		last = element;
+		last.style.outline = '2px solid #f00';
+		if (report) report.text( "Label: " +  getLabel(last) + ' / ' + cssPath(last));
 	}
 
 
@@ -174,7 +171,7 @@
 	 */
 	function inspectorMouseOut(e) {
 		// Remove outline from element:
-		e.target.style.outline = '';
+		(e.target || e.srcElement).style.outline = ''; // play nice with IE
 	}
 
 
@@ -182,14 +179,27 @@
 	 * Click action for hovered element
 	 */
 	function inspectorOnClick(e) {
-		e.preventDefault();
-		e.stopImmediatePropagation();
+		var target = e.target || e.srcElement; // e.target is not IE friendly, play nice
+
+		// this was not old IE friendly. (fixed now)
+		// jQuery will normalize preventDefault and stopImmediatePropagation
+		// but we didn't use jQuery to attach these events
+		if (e.preventDefault) {
+			e.preventDefault();
+		} else {
+			e.returnValue = false;
+		}
+		if (e.stopImmediatePropagation) {
+			e.stopImmediatePropagation();
+		} else if (e.stopPropagation) {
+			e.stopPropagation();
+		}
 
 		// These are the default actions (the XPath code might be a bit janky)
 		// Really, these could do anything:
-		console.log( cssPath(e.target) );
-		console.log( getLabel(e.target) );
-		if (report) report.text(  " Label: " +  getLabel(e.target) + ' / ' + cssPath(e.target));
+		console.log( cssPath(target) );
+		console.log( getLabel(target) );
+		if (report) report.text(  'Label: ' +  getLabel(target) + ' / ' + cssPath(target));
 
 		/* console.log( getXPath(e.target).join('/') ); */
 
@@ -202,24 +212,28 @@
 	 * Function to cancel inspector:
 	 */
 	function inspectorCancel(e) {
-		// Unbind inspector mouse and click events:
-		if (e === null && event.keyCode === 27) { // IE (won't work yet):
-			document.detachEvent("mouseover", inspectorMouseOver);
-			document.detachEvent("mouseout", inspectorMouseOut);
-			document.detachEvent("click", inspectorOnClick);
-			document.detachEvent("keydown", inspectorCancel);
-			last.style.outlineStyle = '';
-		} else if(e === null || e.which === 27) { // Better browsers:
-			document.removeEventListener("mouseover", inspectorMouseOver, true);
-			document.removeEventListener("mouseout", inspectorMouseOut, true);
-			document.removeEventListener("click", inspectorOnClick, true);
-			document.removeEventListener("keydown", inspectorCancel, true);
+		if (e === null || e.keyCode === 27) {
+			// Unbind inspector mouse and click events:
+			if (document.detachEvent) {
+				document.detachEvent("onmouseover", inspectorMouseOver);
+				document.detachEvent("onmouseout", inspectorMouseOut);
+				document.detachEvent("onclick", inspectorOnClick);
+				document.detachEvent("onkeydown", inspectorCancel);
+			} if (document.removeEventListener) { // Better browsers:
+				document.removeEventListener("mouseover", inspectorMouseOver, true);
+				document.removeEventListener("mouseout", inspectorMouseOut, true);
+				document.removeEventListener("click", inspectorOnClick, true);
+				document.removeEventListener("keydown", inspectorCancel, true);
+			}
 
-			// Remove outline on last-selected element:
-			last.style.outline = '';
-		}
-		if (done_callback)  {
-			done_callback();
+			// If user immediately cancels, last is still undefined
+			if (last) {
+				// Remove outline on last-selected element:
+				last.style.outline = '';
+			}
+			if (done_callback)  {
+				done_callback();
+			}
 		}
 	}
 
@@ -236,10 +250,10 @@
 			document.addEventListener("click", inspectorOnClick, true);
 			document.addEventListener("keydown", inspectorCancel, true);
 		} else if ( document.attachEvent ) {
-			document.attachEvent("mouseover", inspectorMouseOver);
-			document.attachEvent("mouseout", inspectorMouseOut);
-			document.attachEvent("click", inspectorOnClick);
-			document.attachEvent("keydown", inspectorCancel);
+			document.attachEvent("onmouseover", inspectorMouseOver);
+			document.attachEvent("onmouseout", inspectorMouseOut);
+			document.attachEvent("onclick", inspectorOnClick);
+			document.attachEvent("onkeydown", inspectorCancel);
 		}
 	}
 })(document);
