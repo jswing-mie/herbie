@@ -92,7 +92,8 @@ var herbie_sample_script = 'Type "hi" in to "Address" input.\n' +
 
 (function() {
 	var button = document.getElementById('slowok');
-	var slowokclick = function(e){
+
+	function slowokclick(e){
 		if (runonce) {
 			return;
 		}
@@ -106,7 +107,7 @@ var herbie_sample_script = 'Type "hi" in to "Address" input.\n' +
 //				btn.appendChild(div.children[0]);
 //			}
 		}, 1500);
-	};
+	}
 	
 	if (document.addEventListener) {
 		button.addEventListener('click', slowokclick, false);
