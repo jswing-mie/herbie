@@ -21,13 +21,13 @@
 			case 'INPUT':
 				switch (el.type) {
 					case 'checkbox':
-						if (el.id=='')
+						if (el.id==='')
 							label = "'" + el.value + "' checkbox";
 						else
 							label = "'#" + el.id + "' checkbox";
 						break;
 					case 'text':
-						if (el.id=='')
+						if (el.id==='')
 							label = "'" + el.name + "' input";
 						else
 							label = "'#" + el.id + "' input";
