@@ -219,7 +219,7 @@
 				document.detachEvent("onmouseout", inspectorMouseOut);
 				document.detachEvent("onclick", inspectorOnClick);
 				document.detachEvent("onkeydown", inspectorCancel);
-			} if (document.removeEventListener) { // Better browsers:
+			} else if (document.removeEventListener) { // Better browsers:
 				document.removeEventListener("mouseover", inspectorMouseOver, true);
 				document.removeEventListener("mouseout", inspectorMouseOut, true);
 				document.removeEventListener("click", inspectorOnClick, true);
