@@ -78,16 +78,18 @@ And finally, it has a link <a href="http://www.google.com/">going away</a>
 </div>
 
 <script type="text/javascript">
+'use strict';
+
 var runonce=false;
 
-var herbie_sample_script = 'Type "hi" in to "Address" input.\n' +
-	'Fill out the following fields: \n' +
-	'* Last Name: Horner\n' +
-	'* Phone: 260-459-6270\n' +
-	'Click on the "Save" button.\n' +
-	'Click "OK".\n' +
-	'Type "finally" in "Slow Input"\n' +
-	'Click on the "going away" link.\n' +
+var herbie_sample_script = 'Type "hi" in to "Address" input.\r' +
+	'Fill out the following fields: \r' +
+	'* Last Name: Horner\r' +
+	'* Phone: 260-459-6270\r' +
+	'Click on the "Save" button.\r' +
+	'Click "OK".\r' +
+	'Type "finally" in "Slow Input"\r' +
+	'Click on the "going away" link.\r' +
 	'Type "it worked" in "#lst-ib"';
 
 (function() {
@@ -99,50 +101,56 @@ var herbie_sample_script = 'Type "hi" in to "Address" input.\n' +
 		}
 		runonce = true;
 		setTimeout(function() {
-			var btn = e.toElement;
-			var div = document.createElement('span');
-			div.innerHTML = '<label for="input_slow">Slow Input:</label><input id="input_slow" name="slowly" size="15" type="text" /><br>';
-			btn.parentNode.insertBefore(div, btn.nextSibling.nextSibling);
-//			while (div.children.length > 0) {
-//				btn.appendChild(div.children[0]);
+			var btn = e.target || e.srcElement;
+			var span = document.createElement('span');
+			span.innerHTML = '<label for="input_slow">Slow Input:</label><input id="input_slow" name="slowly" size="15" type="text" /><br>';
+			btn.parentNode.insertBefore(span, btn.nextSibling.nextSibling);
+//			while (span.children.length > 0) {  // waiting for Doug to delete this, breaks SONAR rules
+//				btn.appendChild(span.children[0]);
 //			}
 		}, 1500);
 	}
-	
+
+	function TryJQuery() {
+		if (typeof(jQuery) !== 'undefined') {
+			jQuery.getScript('../dist/jquery.simulate.js');
+			jQuery.getScript('../dist/bililiteRange.js');
+			jQuery.getScript('../dist/jquery.simulate.ext.js');
+			jQuery.getScript('../dist/jquery.simulate.drag-n-drop.js');
+			jQuery.getScript('../dist/jquery.simulate.key-sequence.js');
+			jQuery.getScript('../dist/jquery.simulate.key-combo.js');
+			jQuery.getScript('../src/inspector.js');
+			jQuery.getScript('../src/herbie.js', TryHerbie);
+		} else {
+			setTimeout(TryJQuery, 200);
+		}
+	}
+
+	function TryHerbie() {
+		if (typeof(Herbie) !== 'undefined') {
+			Herbie.BuildUI('../src/', herbie_sample_script);
+		} else {
+			setTimeout(TryHerbie, 200);
+		}
+	}
+
 	if (document.addEventListener) {
 		button.addEventListener('click', slowokclick, false);
 	} else if ( document.attachEvent ) {
-		button.attachEvent('click', slowokclick);
+		button.attachEvent('onclick', slowokclick);
 	}
 
-	function loadjsfile(filename){
-		var fileref=document.createElement('script');
-		fileref.async = false;
-		fileref.setAttribute('type', 'text/javascript');
-		fileref.setAttribute('src', filename);
-        document.getElementsByTagName('head')[0].appendChild(fileref);
-	}
 	// If #run_herbie is on the URL, then we can load this in the page.
 	if (window.location.hash==='#run_herbie') {
-		loadjsfile('../dist/jquery.min.js');
-		loadjsfile('../dist/jquery.simulate.js');
-		loadjsfile('../dist/bililiteRange.js');
-		loadjsfile('../dist/jquery.simulate.ext.js');
-		loadjsfile('../dist/jquery.simulate.drag-n-drop.js');
-		loadjsfile('../dist/jquery.simulate.key-sequence.js');
-		loadjsfile('../dist/jquery.simulate.key-combo.js');
-		loadjsfile('../src/inspector.js');
-		loadjsfile('../src/herbie.js');
+		// old IE has an issue with executing dynamically loaded scripts in the right order
+		// jQuery has a fix for this so I'm loading just jQuery first
+		var fileref = document.createElement('script');
 
-		// This code is to load herbie whenever the above script injection finishes.
-		function TryHerbie() {
-			if (typeof(Herbie) !== 'undefined') {
-				Herbie.BuildUI('../src/', herbie_sample_script);
-			} else {
-				setTimeout(TryHerbie, 500);
-			}
-		}
-		setTimeout(TryHerbie, 10);
+		fileref.async = false;
+		fileref.setAttribute('type', 'text/javascript');
+		fileref.setAttribute('src', '../dist/jquery.min.js');
+		document.getElementsByTagName('head')[0].appendChild(fileref);
+		setTimeout(TryJQuery, 10);
 	}
 })();
 </script>
